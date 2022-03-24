@@ -106,12 +106,18 @@ const Token& Lexer::CurrentToken() const {
 }
 
 Token Lexer::NextToken() {
-    size_t spaces = GetSpaceCount();
-    size_t indent_lvl = spaces / indent_space_count_;
 
-    if (Token* token = GetIndentOrDedentToken(indent_lvl))
+    if (new_line_)
     {
-        return *token;
+        static size_t spaces = 0u;
+        CountSpaces(spaces);
+        size_t indent_lvl = spaces / indent_space_count_;
+
+        if (Token* token = GetIndentOrDedentToken(indent_lvl))
+        {
+            return *token;
+        }
+        spaces = 0u;
     }
 
     SkipSpaces();
@@ -167,16 +173,18 @@ void Lexer::GoToStart()
 
 void Lexer::SkipComment()
 {
-    if (input_.peek() != '#') { return; }
     while (input_.peek() != '\n' && !input_.eof()) 
     {
         input_.get();
     }
 }
 
-size_t Lexer::GetSpaceCount()
+void Lexer::CountSpaces(size_t& spaces)
 {
-    size_t spaces = 0u;
+    while (input_.peek() == '\n')   // skip for avoiding decreasing indent level
+    {
+        input_.get();
+    }
 
     while (input_.peek() == ' ')
     {
@@ -189,8 +197,6 @@ size_t Lexer::GetSpaceCount()
             input_.get();
         }
     }
-
-    return spaces;
 }
 
 void Lexer::SkipSpaces()
@@ -215,10 +221,12 @@ Token* Lexer::GetIndentOrDedentToken(size_t indent_level)
 
     if (indent_level > current_indent_lvl_)
     {
+        ++current_indent_lvl_;
         current_token_ = token_type::Indent{};
     }
     else
     {
+        --current_indent_lvl_;
         current_token_ = token_type::Dedent{};
     }
     return &current_token_;
@@ -290,6 +298,7 @@ Token Lexer::GetStringToken(char peek)
             }
             escaped = false;
         }
+        peek = input_.get();
     }
     return token_type::String{ str };
 }
@@ -307,11 +316,11 @@ Token Lexer::GetNewLineToken()
 
 Token Lexer::GetEofToken()
 {
-    // if (!empty_line_)
-    // {
-    //     empty_line_ = true;
-    //     return token_type::Newline{};
-    // }
+    if (!empty_line_)
+    {
+        empty_line_ = true;
+        return token_type::Newline{};
+    }
     return token_type::Eof{};
 }
 
@@ -320,7 +329,8 @@ Token Lexer::GetCharToken(char peek)
     empty_line_ = false;
 
     string str;
-    str += peek + input_.peek();
+    str += peek;
+    str += input_.peek();
 
     if (keywords_tokens_.count(str))
     {

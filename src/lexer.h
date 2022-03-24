@@ -143,7 +143,7 @@ private:
     void GoToStart();
     void SkipComment();
     void SkipSpaces();
-    size_t GetSpaceCount();
+    void CountSpaces(size_t& spaces);
 
     // Functions for tokens
     Token* GetIndentOrDedentToken(size_t indent_level);
