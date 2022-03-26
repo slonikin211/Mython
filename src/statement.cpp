@@ -58,17 +58,17 @@ ObjectHolder VariableValue::Execute(Closure& closure, Context& context) {
                 }
                 else
                 {
-                    throw std::runtime_error("");
+                    throw std::runtime_error("Not implemented"s);
                 }
             }
             else
             {
-                throw std::runtime_error("");
+                throw std::runtime_error("Not implemented"s);
             }
         }
         return obj_holder;
     }
-    throw std::runtime_error("");
+    throw std::runtime_error("Not implemented"s);
 }
 
 unique_ptr<Print> Print::Variable(const std::string& name) {
@@ -155,7 +155,7 @@ ObjectHolder Add::Execute(Closure& closure, Context& context) {
             return lhs_obj_holder.TryAs<runtime::ClassInstance>()->Call(ADD_METHOD, { rhs_obj_holder }, context);
         }
     }
-    throw std::runtime_error("");
+    throw std::runtime_error("Not implemented"s);
 }
 
 ObjectHolder Sub::Execute(Closure& closure, Context& context) {
@@ -169,7 +169,7 @@ ObjectHolder Sub::Execute(Closure& closure, Context& context) {
         int rhs = rhs_obj_holder.TryAs<runtime::ValueObject<int>>()->GetValue();
         return runtime::ObjectHolder::Own(runtime::Number(lhs - rhs));
     }
-    throw std::runtime_error("");
+    throw std::runtime_error("Not implemented"s);
 }
 
 ObjectHolder Mult::Execute(Closure& closure, Context& context) {
@@ -183,7 +183,7 @@ ObjectHolder Mult::Execute(Closure& closure, Context& context) {
         int rhs = rhs_obj_holder.TryAs<runtime::ValueObject<int>>()->GetValue();
         return runtime::ObjectHolder::Own(runtime::Number(lhs * rhs));
     }
-    throw std::runtime_error("");
+    throw std::runtime_error("Not implemented"s);
 }
 
 ObjectHolder Div::Execute(Closure& closure, Context& context) {
@@ -196,10 +196,10 @@ ObjectHolder Div::Execute(Closure& closure, Context& context) {
         int lhs = lhs_obj_holder.TryAs<runtime::ValueObject<int>>()->GetValue();
         int rhs = rhs_obj_holder.TryAs<runtime::ValueObject<int>>()->GetValue();
 
-        if (rhs == 0) { throw std::runtime_error(""); }
+        if (rhs == 0) { throw std::runtime_error("Not implemented"s); }
         return runtime::ObjectHolder::Own(runtime::Number(lhs / rhs));
     }
-    throw std::runtime_error("");
+    throw std::runtime_error("Not implemented"s);
 }
 
 ObjectHolder Compound::Execute(Closure& closure, Context& context) {

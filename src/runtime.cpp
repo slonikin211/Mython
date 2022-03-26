@@ -1,7 +1,6 @@
 #include "runtime.h"
 
 #include <cassert>
-#include <optional>
 #include <sstream>
 
 using namespace std;
@@ -63,15 +62,15 @@ bool IsTrue(const ObjectHolder& object) {
 
 namespace special_methods
 {
-    const string str = "__str__"s;
-    const string equal = "__eq__"s;
-    const string less = "__lt__"s; 
+    const string kStr = "__str__"s;
+    const string kEqual = "__eq__"s;
+    const string kLess = "__lt__"s; 
 }
 
 void ClassInstance::Print(std::ostream& os, Context& context) {
-    if (this->HasMethod(special_methods::str, 0u))
+    if (this->HasMethod(special_methods::kStr, 0u))
     {
-        this->Call(special_methods::str, {}, context)->Print(os, context);
+        this->Call(special_methods::kStr, {}, context)->Print(os, context);
     }
     else
     {
@@ -152,52 +151,39 @@ void Bool::Print(std::ostream& os, [[maybe_unused]] Context& context) {
 }
 
 bool Equal(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context) {
-    ObjectHolder object_holder;
-    if (object_holder = EqualObjectHolders<int>(lhs, rhs))
+   
+    if (optional<bool> res = Comparer(lhs, rhs, equal_to<>{}); res.has_value())
     {
-        return object_holder.TryAs<runtime::Bool>()->GetValue();
+        return res.value();
     }
-    if (object_holder = EqualObjectHolders<string>(lhs, rhs))
-    {
-        return object_holder.TryAs<runtime::Bool>()->GetValue();
-    }
-    if (object_holder = EqualObjectHolders<bool>(lhs, rhs))
-    {
-        return object_holder.TryAs<runtime::Bool>()->GetValue();
-    }
+
+
     if (!lhs && !rhs)
     {
         return true;
     }
     if (lhs.TryAs<ClassInstance>())
     {
-        if (lhs.TryAs<ClassInstance>()->HasMethod(special_methods::equal, 1u))
+        if (lhs.TryAs<ClassInstance>()->HasMethod(special_methods::kEqual, 1u))
         {
-            return IsTrue(lhs.TryAs<ClassInstance>()->Call(special_methods::equal, { rhs }, context));
+            return IsTrue(lhs.TryAs<ClassInstance>()->Call(special_methods::kEqual, { rhs }, context));
         }
     }
     throw std::runtime_error("Cannot compare objects for equality"s);
 }
 
 bool Less(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context) {
-    ObjectHolder obj_holder;
-    if (obj_holder = LessObjectHolders<int>(lhs, rhs); obj_holder) 
+
+    if (optional<bool> res = Comparer(lhs, rhs, less<>{}))
     {
-        return obj_holder.TryAs<runtime::Bool>()->GetValue();
+        return res.value();
     }
-    else if (obj_holder = LessObjectHolders<string>(lhs, rhs); obj_holder) 
+
+    if (lhs.TryAs<ClassInstance>()) 
     {
-        return obj_holder.TryAs<runtime::Bool>()->GetValue();
-    }
-    else if (obj_holder = LessObjectHolders<bool>(lhs, rhs); obj_holder) 
-    {
-        return obj_holder.TryAs<runtime::Bool>()->GetValue();
-    }
-    else if (lhs.TryAs<ClassInstance>()) 
-    {
-        if (lhs.TryAs<ClassInstance>()->HasMethod(special_methods::less, 1U)) 
+        if (lhs.TryAs<ClassInstance>()->HasMethod(special_methods::kLess, 1U)) 
         {
-            return IsTrue(lhs.TryAs<ClassInstance>()->Call(special_methods::less, { rhs }, context));
+            return IsTrue(lhs.TryAs<ClassInstance>()->Call(special_methods::kLess, { rhs }, context));
         }
     }
     throw std::runtime_error("diffrent tipes"s);

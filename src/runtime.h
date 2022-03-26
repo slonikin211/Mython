@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 namespace runtime {
 
@@ -234,6 +235,34 @@ bool Greater(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context)
 bool LessOrEqual(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context);
 // Возвращает значение, противоположное Less(lhs, rhs, context)
 bool GreaterOrEqual(const ObjectHolder& lhs, const ObjectHolder& rhs, Context& context);
+
+// Compares String, Number, Bool types
+template <typename Predicate>
+std::optional<bool> Comparer(const ObjectHolder& lhs, const ObjectHolder& rhs, Predicate pred)
+{ 
+    if (auto lhs_ptr = lhs.TryAs<String>())
+    {
+        if (auto rhs_ptr = rhs.TryAs<String>())
+        {
+            return pred(lhs_ptr->GetValue(), rhs_ptr->GetValue());
+        }
+    }
+    if (auto lhs_ptr = lhs.TryAs<Number>())
+    {
+        if (auto rhs_ptr = rhs.TryAs<Number>())
+        {
+            return pred(lhs_ptr->GetValue(), rhs_ptr->GetValue());
+        }
+    }
+    if (auto lhs_ptr = lhs.TryAs<Bool>())
+    {
+        if (auto rhs_ptr = rhs.TryAs<Bool>())
+        {
+            return pred(lhs_ptr->GetValue(), rhs_ptr->GetValue());
+        }
+    }
+    return std::nullopt;
+}
 
 // Контекст-заглушка, применяется в тестах.
 // В этом контексте весь вывод перенаправляется в строковый поток вывода output
