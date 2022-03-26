@@ -5,6 +5,9 @@ project(Mython)
 set(SOURCES 
     src/main.cpp
     src/lexer_test_open.cpp
+    src/runtime_test.cpp
+    src/parse_test.cpp
+    src/statement_test.cpp
 )
 set(HEADERS
     src/test_runner_p.h
@@ -12,6 +15,9 @@ set(HEADERS
 
 set(PAIRS
     src/lexer.cpp src/lexer.h
+    src/runtime.cpp src/runtime.h
+    src/parse.cpp src/parse.h
+    src/statement.cpp src/statement.h
 )
 
 add_executable(mython ${SOURCES} ${HEADERS} ${PAIRS})
